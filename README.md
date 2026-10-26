@@ -1,126 +1,64 @@
-<!-- PROJECT LOGO -->
-<br />
-<p align="left">
-    <img src="imgs/logo.png" alt="Logo" width="350" height="55">
-  <p align="left">
-    A web application for uploading and presenting real-time diagnostic automobile data (OBD2) logged by Torque android app.
-  </p>
-</p>
+# torque-dash
 
+A web application for uploading and presenting real-time diagnostic automobile data (OBD2) logged by Torque android app.
 
+![License](https://img.shields.io/github/license/walladanger/torque-dash)
 
-<!-- TABLE OF CONTENTS -->
-## Table of Contents
+![Map View](imgs/mapview.png)
 
-* [About the Project](#about-the-project)
-  * [Built With](#built-with)
-* [Getting Started](#getting-started)
-  * [Installation](#installation)
-  * [Logging Data](#logging-data)
-* [Functionality](#functionality)
-* [License](#license)
+## Features
 
+- Filterable table with a list of all logged sessions
+- Export session data to CSV
+- Edit sessions by renaming, adding start/end locations, copying, or deleting
+- Merge multiple sessions together or cut out parts of a session
+- Graphical representation of the logged ride on a map with a heatline
+- Line chart for PID values and display of live data for ongoing sessions
+- Share logged data with public URLs or forward requests to other servers
 
+## Architecture
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
-
-This project aims to provide a web application capable of receiving, editing and presenting OBD2 automobile data logged by the [Torque Pro](https://play.google.com/store/apps/details?id=org.prowl.torque&hl=en) android application. This provides an open source alternative to the official Torque Web Viewer.
-
-### Built With
-This project was built with the help of
-
-* [Bootstrap](https://getbootstrap.com) - responsive frontend framework
-* [JQuery](https://jquery.com) - javascript library used for DOM manipulation and Ajax
-* [Node.js](https://nodejs.org) - javascript runtime
-* [Express.js](https://expressjs.com) - web framework for Node.js
-* [Sequelize.js](http://docs.sequelizejs.com/) - Node.js ORM for relational databases 
-* [Leaflet.js](https://leafletjs.com/) - javascript library for interactive maps
-* [Chart.js](https://www.chartjs.org/) - javascript charting library
-* ...
-
-
-
-<!-- GETTING STARTED -->
-## Getting Started
-
-To get started using the application you first need a hosting server and postgres database. To try out the app for free, I recommend using a [Heroku Free](https://www.heroku.com/free) Tier account.
-
-### Installation
-#### With Heroku
-
-1. Create a fork of the repo.
-2. Create a new app in Heroku with a postgres addon
-3. Enable GitHub integration for deployment and connect the forked repo to your app ([More info](https://devcenter.heroku.com/articles/github-integration))
-4. Deploy the application from heroku.
-
-#### Local
-
-1. Clone the repo
-```sh
-git clone https://github.com/davekrejci/torque-dash.git
+```mermaid
+flowchart TD
+  routes --> controllers
+  controllers --> models
+  controllers --> views
 ```
-2. Install NPM packages
+
+The application uses Express routes in the `routes` directory to direct incoming requests to the `controllers`. The controllers interact with the PostgreSQL database through Sequelize `models` and render the user interface using Handlebars templates in the `views` directory.
+
+## Quick start
+
+To run this application locally, you will need Node.js and a PostgreSQL database.
+
 ```sh
 npm install
-```
-3. Configure your database connection URI either in your environment variables or in `config.js`
-```JS
-uri: process.env.DATABASE_URL || 'your connection URI'
-```
-4. Start the server
-```sh
 npm start
+npm test
 ```
 
-### Logging data
+For Heroku deployment and instructions on logging data from the Torque app, see [docs/setup.md](docs/setup.md).
 
-To be able to log data from Torque Pro:
+## Configuration
 
-1. Register an account in torqueDASH
-2. In Torque Pro settings set the user email address to the same as your accounts.
-3. In Torque Pro settings set the Webserver URL to the */api/upload* path
-```
-https://yourappname.herokuapp.com/api/upload
-```
+| Name | Purpose | Default |
+| --- | --- | --- |
+| `PORT` | The port the application runs on | `3000` |
+| `DATABASE_URL` | Postgres database connection URI | local dev Postgres URL (see config) |
+| `SESSION_KEYS` | Keys for cookie-session middleware | built-in dev keys — always set in production |
 
-<!-- Functionality -->
-## Functionality
+## Screenshots
 
-### Overview
+![Editing](imgs/editing.gif)
 
-A filterable table with a list of all logged sessions and options to edit, delete and export session data to CSV.
+![Share](imgs/share.png)
 
-### Editing
+## Roadmap
 
-Editing page for sessions with functionality for 
+See issues.
 
-1. renaming
-2. adding start/end locations (geocoding option)
-3. copying and deleting
-4. filtering number of datapoints
-5. cutting out parts of the session
-6. merging multiple sessions together
+## License & credits
 
-![](imgs/editing.gif)
+Distributed under the MIT License. See [LICENSE.txt](LICENSE.txt) for more information.
 
-### Mapview
-
-Provides a graphical representation of the logged ride on top of a map with a heatline for selected PIDs and a line chart beneath the map for charting PID values. Also displays "live" data if watching a currently ongoing session.
-
-![](imgs/mapview.png)
-
-### Share
-
-Provides options for sharing logged data.
-
-1. Sharing with public URL - creates a public URL which provides access to a mapview of your logged sessions
-2. Request forwarding - You may list other server URLs to which the data sent from Torque Pro will be further forwarded (eg. official Torque Web Viewer)
-
-![](imgs/share.png)
-
-
-<!-- LICENSE -->
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
+Based on davekrejci/torque-dash.
