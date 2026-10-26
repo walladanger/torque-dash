@@ -44,8 +44,8 @@ For Heroku deployment and instructions on logging data from the Torque app, see 
 | Name | Purpose | Default |
 | --- | --- | --- |
 | `PORT` | The port the application runs on | `3000` |
-| `DATABASE_URL` | Postgres database connection URI | `postgres://postgres:heslo@localhost:5432/torquedash` |
-| `SESSION_KEYS` | Keys for cookie-session middleware | `['6a5w4d65a4wd', 'a65w4d6aw4d89a4', '65f4b8b4szd8']` |
+| `DATABASE_URL` | Postgres database connection URI | local dev Postgres URL (see config) |
+| `SESSION_KEYS` | Keys for cookie-session middleware | built-in dev keys — always set in production |
 
 ## Screenshots
 
