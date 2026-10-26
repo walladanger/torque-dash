@@ -32,7 +32,7 @@
     "passport-local": "^1.0.0",
     "pg": "^7.9.0",
     "request": "^2.88.0",
-    "sequelize": "^5.4.0",
+    "sequelize": "^6.37.8",
     "shortid": "^2.2.14"
   }
 }
