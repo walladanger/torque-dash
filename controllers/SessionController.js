@@ -168,21 +168,15 @@ class SessionController {
                     userId: session.userId
                 });
                 // Create copy for each session log
-                await Promise.all(session.Logs.map(async log => {
-                    try{
-                        await Log.create({
-                            sessionId: sessionCopy.id,
-                            timestamp: log.dataValues.timestamp,
-                            lon: log.dataValues.lon,
-                            lat: log.dataValues.lat,
-                            values: log.dataValues.values
-                        });
-                    }
-                    catch (err) {
-                        console.log(err);
-                        res.sendStatus(500);
-                    }
-                  }));
+                for (const log of session.Logs) {
+                    await Log.create({
+                        sessionId: sessionCopy.id,
+                        timestamp: log.dataValues.timestamp,
+                        lon: log.dataValues.lon,
+                        lat: log.dataValues.lat,
+                        values: log.dataValues.values
+                    });
+                }
             });
             res.sendStatus(200);
         }
@@ -277,36 +271,24 @@ class SessionController {
                     userId: req.user.id
                 });
                 // Create new joined logs
-                await Promise.all(sessionOne.Logs.map(async log => {
-                    try{
-                        await Log.create({
-                            sessionId: joinSession.id,
-                            timestamp: log.dataValues.timestamp,
-                            lon: log.dataValues.lon,
-                            lat: log.dataValues.lat,
-                            values: log.dataValues.values
-                        });
-                    }
-                    catch (err) {
-                        console.log(err);
-                        res.sendStatus(500);
-                    }
-                }));
-                await Promise.all(sessionTwo.Logs.map(async log => {
-                    try{
-                        await Log.create({
-                            sessionId: joinSession.id,
-                            timestamp: log.dataValues.timestamp,
-                            lon: log.dataValues.lon,
-                            lat: log.dataValues.lat,
-                            values: log.dataValues.values
-                        });
-                    }
-                    catch (err) {
-                        console.log(err);
-                        res.sendStatus(500);
-                    }
-                }));
+                for (const log of sessionOne.Logs) {
+                    await Log.create({
+                        sessionId: joinSession.id,
+                        timestamp: log.dataValues.timestamp,
+                        lon: log.dataValues.lon,
+                        lat: log.dataValues.lat,
+                        values: log.dataValues.values
+                    });
+                }
+                for (const log of sessionTwo.Logs) {
+                    await Log.create({
+                        sessionId: joinSession.id,
+                        timestamp: log.dataValues.timestamp,
+                        lon: log.dataValues.lon,
+                        lat: log.dataValues.lat,
+                        values: log.dataValues.values
+                    });
+                }
             });
             res.sendStatus(200);
         }
