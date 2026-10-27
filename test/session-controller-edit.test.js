@@ -64,6 +64,9 @@ test('SessionController edit methods (copy, filter, cut, join)', async (t) => {
         fakeModels.Log.create.mock.resetCalls();
         fakeModels.Log.destroy.mock.resetCalls();
         fakeShortid.generate.mock.resetCalls();
+        // Reset persistent implementations so tests don't depend on order.
+        fakeModels.Session.findOne.mock.mockImplementation(async () => {});
+        fakeModels.Log.create.mock.mockImplementation(async () => {});
 
         console.log = mock.fn();
     });
@@ -147,7 +150,7 @@ test('SessionController edit methods (copy, filter, cut, join)', async (t) => {
         assert.equal(res.sendStatus.mock.calls[0].arguments[0], 500);
     });
 
-    await t.test('copy - inner Log.create error -> multiple 500s', async () => {
+    await t.test('copy - first Log.create fails -> 500 then 200 (known double-response bug)', async () => {
         const req = { user: { id: 10 }, params: { sessionId: 'sid1' }, body: { name: 'copied' } };
         const res = createFakeRes();
 
@@ -161,25 +164,17 @@ test('SessionController edit methods (copy, filter, cut, join)', async (t) => {
 
         fakeModels.Session.create.mock.mockImplementationOnce(async () => ({ id: 99 }));
 
-        fakeModels.Log.create.mock.mockImplementationOnce(async () => {
-            throw new Error('Log DB error');
-        });
-        fakeModels.Log.create.mock.mockImplementationOnce(async () => {
-            throw new Error('Log DB error');
-        });
-        fakeModels.Log.create.mock.mockImplementationOnce(async () => {
-            throw new Error('Log DB error');
-        });
+        // Only the first Log.create call (call index 0) rejects.
         fakeModels.Log.create.mock.mockImplementationOnce(async () => {
             throw new Error('Log DB error');
         });
 
         await SessionController.copy(req, res);
 
+        assert.equal(fakeModels.Log.create.mock.calls.length, 2);
         assert.equal(res.sendStatus.mock.calls.length, 2);
         assert.equal(res.sendStatus.mock.calls[0].arguments[0], 500);
         assert.equal(res.sendStatus.mock.calls[1].arguments[0], 200);
-
     });
 
     await t.test('filter - success', async () => {
@@ -418,7 +413,7 @@ test('SessionController edit methods (copy, filter, cut, join)', async (t) => {
         assert.equal(res.sendStatus.mock.calls[0].arguments[0], 500);
     });
 
-    await t.test('join - inner Log.create error -> multiple 500s', async () => {
+    await t.test('join - first Log.create fails -> 500 then 200 (known double-response bug)', async () => {
         const req = { user: { id: 10 }, params: { sessionId: 8 }, body: { joinSessionId: 9, name: 'joined' } };
         const res = createFakeRes();
 
@@ -430,24 +425,16 @@ test('SessionController edit methods (copy, filter, cut, join)', async (t) => {
 
         fakeModels.Session.create.mock.mockImplementationOnce(async () => ({ id: 89 }));
 
-        fakeModels.Log.create.mock.mockImplementationOnce(async () => {
-            throw new Error('Log DB error');
-        });
-        fakeModels.Log.create.mock.mockImplementationOnce(async () => {
-            throw new Error('Log DB error');
-        });
-        fakeModels.Log.create.mock.mockImplementationOnce(async () => {
-            throw new Error('Log DB error');
-        });
+        // Only the first Log.create call (call index 0) rejects.
         fakeModels.Log.create.mock.mockImplementationOnce(async () => {
             throw new Error('Log DB error');
         });
 
         await SessionController.join(req, res);
 
+        assert.equal(fakeModels.Log.create.mock.calls.length, 2);
         assert.equal(res.sendStatus.mock.calls.length, 2);
         assert.equal(res.sendStatus.mock.calls[0].arguments[0], 500);
         assert.equal(res.sendStatus.mock.calls[1].arguments[0], 200);
-
     });
 });
