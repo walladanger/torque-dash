@@ -1,6 +1,5 @@
 const { test, mock, beforeEach } = require('node:test');
 const assert = require('node:assert/strict');
-const bcrypt = require('bcrypt');
 
 // Setup fakes
 const modelsPath = require.resolve('../models');
@@ -83,32 +82,35 @@ test('passport config', async (t) => {
     });
 
     await t.test('verify callback - wrong password', async () => {
+        const comparePasswordMock = mock.fn(async (password) => false);
         const fakeUser = {
-            comparePassword: async (password) => false
+            comparePassword: comparePasswordMock
         };
         fakeModels.User.findOne.mock.mockImplementation(async () => fakeUser);
         const done = mock.fn();
         await strategyVerify('user@test.com', 'wrong', done);
 
         assert.equal(fakeModels.User.findOne.mock.calls.length, 1);
+        assert.equal(comparePasswordMock.mock.calls.length, 1);
+        assert.equal(comparePasswordMock.mock.calls[0].arguments[0], 'wrong');
         assert.equal(done.mock.calls.length, 1);
         assert.deepEqual(done.mock.calls[0].arguments, [null, false, { message: 'Incorrect username or password.' }]);
     });
 
     await t.test('verify callback - correct password', async () => {
-        const salt = await bcrypt.genSalt(8);
-        const hash = await bcrypt.hash('correct', salt);
-
+        const comparePasswordMock = mock.fn(async (password) => password === 'correct');
         const fakeUser = {
             id: 1,
             email: 'user@test.com',
-            comparePassword: async (password) => await bcrypt.compare(password, hash)
+            comparePassword: comparePasswordMock
         };
         fakeModels.User.findOne.mock.mockImplementation(async () => fakeUser);
         const done = mock.fn();
         await strategyVerify('user@test.com', 'correct', done);
 
         assert.equal(fakeModels.User.findOne.mock.calls.length, 1);
+        assert.equal(comparePasswordMock.mock.calls.length, 1);
+        assert.equal(comparePasswordMock.mock.calls[0].arguments[0], 'correct');
         assert.equal(done.mock.calls.length, 1);
         assert.deepEqual(done.mock.calls[0].arguments, [null, fakeUser]);
     });
