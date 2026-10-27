@@ -115,8 +115,10 @@ test('SessionController.getOne', async (t) => {
         const session = { id: 2, dataValues: {} };
         fakeModels.Session.findOne.mock.mockImplementationOnce(async () => session);
 
-        fakeModels.Log.findAll.mock.mockImplementation(async () => [{ timestamp: 1000 }]);
-
+        // addStartEndData asks for the first (ASC) then the last (DESC) log
+        const stamps = [1000, 3724000];
+        let call = 0;
+        fakeModels.Log.findAll.mock.mockImplementation(async () => [{ timestamp: stamps[call++] }]);
 
         await SessionController.getOne(req, res);
 
@@ -126,10 +128,16 @@ test('SessionController.getOne', async (t) => {
 
         assert.equal(res.send.mock.calls.length, 1);
         assert.equal(res.send.mock.calls[0].arguments[0], session);
+        assert.deepEqual(fakeModels.Log.findAll.mock.calls[0].arguments[0], {
+            limit: 1, where: { sessionId: 2 }, order: [['timestamp', 'ASC']]
+        });
+        assert.deepEqual(fakeModels.Log.findAll.mock.calls[1].arguments[0], {
+            limit: 1, where: { sessionId: 2 }, order: [['timestamp', 'DESC']]
+        });
         assert.equal(session.dataValues.startDate, 1000);
-        assert.equal(session.dataValues.endDate, 1000);
-        // moment.duration(4000) is 4 seconds
-        assert.equal(session.dataValues.duration, '0 seconds');
+        assert.equal(session.dataValues.endDate, 3724000);
+        // 3723000 ms = 1 h 2 min 3 s
+        assert.equal(session.dataValues.duration, '1 hour 02 minutes 03 seconds');
     });
 
     await t.test('Not found -> resolves null, sends 404 Resource not found', async () => {
