@@ -150,7 +150,7 @@ test('SessionController edit methods (copy, filter, cut, join)', async (t) => {
         assert.equal(res.sendStatus.mock.calls[0].arguments[0], 500);
     });
 
-    await t.test('copy - first Log.create fails -> 500 then 200 (known double-response bug)', async () => {
+    await t.test('copy - first Log.create fails -> 500 and stops', async () => {
         const req = { user: { id: 10 }, params: { sessionId: 'sid1' }, body: { name: 'copied' } };
         const res = createFakeRes();
 
@@ -171,10 +171,9 @@ test('SessionController edit methods (copy, filter, cut, join)', async (t) => {
 
         await SessionController.copy(req, res);
 
-        assert.equal(fakeModels.Log.create.mock.calls.length, 2);
-        assert.equal(res.sendStatus.mock.calls.length, 2);
+        assert.equal(fakeModels.Log.create.mock.calls.length, 1);
+        assert.equal(res.sendStatus.mock.calls.length, 1);
         assert.equal(res.sendStatus.mock.calls[0].arguments[0], 500);
-        assert.equal(res.sendStatus.mock.calls[1].arguments[0], 200);
     });
 
     await t.test('filter - success', async () => {
@@ -413,7 +412,7 @@ test('SessionController edit methods (copy, filter, cut, join)', async (t) => {
         assert.equal(res.sendStatus.mock.calls[0].arguments[0], 500);
     });
 
-    await t.test('join - first Log.create fails -> 500 then 200 (known double-response bug)', async () => {
+    await t.test('join - first Log.create fails -> 500 and stops', async () => {
         const req = { user: { id: 10 }, params: { sessionId: 8 }, body: { joinSessionId: 9, name: 'joined' } };
         const res = createFakeRes();
 
@@ -432,9 +431,8 @@ test('SessionController edit methods (copy, filter, cut, join)', async (t) => {
 
         await SessionController.join(req, res);
 
-        assert.equal(fakeModels.Log.create.mock.calls.length, 2);
-        assert.equal(res.sendStatus.mock.calls.length, 2);
+        assert.equal(fakeModels.Log.create.mock.calls.length, 1);
+        assert.equal(res.sendStatus.mock.calls.length, 1);
         assert.equal(res.sendStatus.mock.calls[0].arguments[0], 500);
-        assert.equal(res.sendStatus.mock.calls[1].arguments[0], 200);
     });
 });
